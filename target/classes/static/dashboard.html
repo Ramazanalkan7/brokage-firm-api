@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f9;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .main {
+      display: flex;
+      flex: 1;
+    }
+
+    nav {
+      width: 220px;
+      background-color: #34495e;
+      color: white;
+      padding: 20px;
+    }
+
+    nav ul {
+      list-style: none;
+    }
+
+    nav li {
+      padding: 10px 0;
+      cursor: pointer;
+    }
+
+    nav li:hover,
+    nav li.active {
+      background-color: #2c3e50;
+      padding-left: 10px;
+      border-left: 3px solid #1abc9c;
+    }
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      background-color: white;
+      overflow-y: auto;
+    }
+
+    button.logout {
+      background-color: #e74c3c;
+      border: none;
+      padding: 8px 16px;
+      color: white;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button.logout:hover {
+      background-color: #c0392b;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0 16px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button.action-btn {
+      background-color: #1abc9c;
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.action-btn:hover {
+      background-color: #16a085;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #1abc9c;
+      color: white;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-weight: 600;
+    }
+
+    .custom-select-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 16px;
+    }
+
+    .custom-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: white;
+      font-size: 16px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .custom-select:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+    .sell-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;       /* Buton biraz daha geniş olsun */
+      border-radius: 12px;     /* Daha yuvarlak köşeler */
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;         /* Biraz daha okunabilir */
+      box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);  /* Hafif gölge */
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      user-select: none;
+    }
+
+    .sell-btn:hover {
+      background-color: #c0392b;
+      transform: translateY(-2px);  /* Hoverda hafif yukarı kalkma efekti */
+      box-shadow: 0 6px 12px rgba(192, 57, 43, 0.5);
+    }
+
+    .sell-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 6px rgba(192, 57, 43, 0.4);
+    }
+
+    .modal {
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #333;
+      text-align: center;
+    }
+
+    .close {
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div id="userFullName">Welcome, John Doe</div>
+  <button class="logout" onclick="logout()">Logout</button>
+</header>
+
+<div class="main">
+  <nav>
+    <ul>
+      <li class="active" onclick="showSection('assets')">My Assets</li>
+      <li onclick="showSection('transactions')">Make a Transaction</li>
+      <li onclick="showSection('order')">My Order</li>
+      <li onclick="showSection('history')">Transaction History</li>
+    </ul>
+  </nav>
+
+  <div class="content" id="dashboardContent">
+    <!-- Initial content -->
+    <h2>My Assets</h2>
+    <p>Loading your assets...</p>
+  </div>
+</div>
+
+<div id="sellModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeSellModal()">&times;</span>
+    <h3>Sell Asset</h3>
+    <p id="modalAssetInfo"></p>
+
+    <label for="sellQuantity">Quantity</label>
+    <input type="number" id="sellQuantity" min="0.01" step="0.01" />
+
+    <p>Price per unit: <span id="sellPrice"></span></p>
+
+    <button onclick="confirmSell()" class="sell-btn">Confirm Sell</button>
+  </div>
+</div>
+<script>
+  const dashboardContent = document.getElementById('dashboardContent');
+  const navItems = document.querySelectorAll('nav li');
+  let currentCustomer = null;
+
+ async function loadCustomerInfo() {
+    const email = localStorage.getItem('customerEmail');
+    if (!email) {
+      window.location.href = 'login.html';
+      return;
+    }
+    try {
+      const response = await fetch(`http://localhost:8080/api/customer/info?email=${encodeURIComponent(email)}`);
+      if (response.ok) {
+        const customer = await response.json();
+        currentCustomer = customer;
+        document.getElementById('userFullName').textContent = `Welcome, ${customer.name}`;
+      } else {
+        document.getElementById('userFullName').textContent = 'Welcome';
+      }
+    } catch (err) {
+      console.error('Error loading customer info', err);
+      document.getElementById('userFullName').textContent = 'Welcome';
+    }
+    loadAssets();
+  }
+ window.onload = loadCustomerInfo;
+
+ function showSection(section) {
+    navItems.forEach(item => item.classList.remove('active'));
+    const clickedItem = Array.from(navItems).find(item => {
+      return item.textContent.toLowerCase().includes(section);
+    });
+    if (clickedItem) clickedItem.classList.add('active');
+
+    if (section === 'assets') {
+      loadAssets();
+    } else if (section === 'transactions') {
+      loadTransactionForm();
+    } else if (section === 'history') {
+      loadTransactionHistory();
+    }
+    else if (section === 'order') {
+      loadOrders();
+    }
+  }
+
+ async function loadAssets() {
+  dashboardContent.innerHTML = '<h2>My Assets</h2><p>Loading your assets...</p>';
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/assets?customerId=${encodeURIComponent(currentCustomer.id)}`);
+    if (!res.ok) throw new Error('Failed to load assets');
+
+    const assets = await res.json();
+
+    if (assets.length === 0) {
+      dashboardContent.innerHTML = '<h2>My Assets</h2><p>You have no assets.</p>';
+      return;
+    }
+
+    let html = `
+      <h2>My Assets</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Asset Name</th>
+            <th>Quantity</th>
+            <th>Current Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    assets.forEach(asset => {
+      html += `
+        <tr>
+          <td>${asset.assetName}</td>
+          <td>${asset.totalSize}</td>
+          <td>${asset.usableSize.toFixed(2)}</td>
+          <td>
+            <button
+              class="sell-btn"
+              onclick="openSellModal('${asset.assetName}', ${asset.usableSize.toFixed(2)}, ${asset.totalSize})">Sell</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    dashboardContent.innerHTML = html;
+
+  } catch (error) {
+    dashboardContent.innerHTML = `<h2>My Assets</h2><p style="color:red;">${error.message}</p>`;
+  }
+}
+
+async function makeSellTransaction(assetName, maxSize, price) {
+  const size = prompt(`Enter the quantity to sell (max: ${maxSize}):`);
+
+  const numericSize = parseFloat(size);
+
+  if (isNaN(numericSize) || numericSize <= 0 || numericSize > maxSize) {
+    alert('Invalid quantity.');
+    return;
+  }
+
+  const order = {
+    assetName,
+    price: price,
+    size: numericSize,
+    customerId: currentCustomer.id,
+    orderSide: 'SELL'
+  };
+
+  try {
+    const res = await fetch('http://localhost:8080/api/orders/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+
+    const message = await res.text();
+
+    if (res.ok) {
+      alert('Sell order placed successfully!');
+      loadAssets(); // refresh the list
+    } else {
+      alert('Sell order failed: ' + message);
+    }
+  } catch (error) {
+    alert('Error placing sell order: ' + error.message);
+  }
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+
+async function loadOrders() {
+  dashboardContent.innerHTML = '<h2>My Orders</h2><p>Loading your orders...</p>';
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/orders?customerId=${encodeURIComponent(currentCustomer.id)}`);
+    if (!res.ok) throw new Error('Failed to load orders');
+
+    const orders = await res.json();
+
+    if (orders.length === 0) {
+      dashboardContent.innerHTML = '<h2>My Orders</h2><p>You have no orders.</p>';
+      return;
+    }
+console.log(orders);
+    let html = `
+      <h2>My Orders</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Asset Name</th>
+            <th>Size</th>
+            <th>Current Price</th>
+            <th>Status</th>
+            <th>Order Side</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    orders.forEach(order => {
+      html += `
+        <tr>
+          <td>${order.assetName}</td>
+          <td>${order.size}</td>
+          <td>${order.price.toFixed(2)}</td>
+          <td>${order.status}</td>
+          <td>${order.orderSide}</td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    dashboardContent.innerHTML = html;
+
+  } catch (error) {
+    dashboardContent.innerHTML = `<h2>My Orders</h2><p style="color:red;">${error.message}</p>`;
+  }
+}
+
+// Global asset list
+const assets = {
+  AAPL: 175.30,
+  GOOGL: 134.55,
+  TSLA: 192.70,
+  MSFT: 320.10
+};
+
+function updatePrice() {
+  console.log('girdim update price');
+  const assetSelect = document.getElementById('asset');
+  const selectedAsset = assetSelect.value;
+  const priceInput = document.getElementById('price');
+
+  if (selectedAsset && assets[selectedAsset]) {
+    priceInput.value = assets[selectedAsset];
+  } else {
+    priceInput.value = '';
+  }
+}
+
+// Transaction form
+function loadTransactionForm() {
+  dashboardContent.innerHTML = `
+    <h2>Make a Transaction</h2>
+
+    <label for="asset">Asset Name</label>
+    <div class="custom-select-wrapper">
+      <select id="asset" onchange="updatePrice()" class="custom-select">
+        <option value="">-- Select Asset --</option>
+        ${Object.keys(assets).map(asset => `<option value="${asset}">${asset}</option>`).join('')}
+      </select>
+    </div>
+
+    <label for="quantity">Quantity</label>
+    <input type="number" id="size" min="1" />
+
+    <label for="price">Price per unit</label>
+    <input type="number" id="price" min="0" step="0.01" readonly />
+
+    <button class="action-btn" onclick="makeTransaction()">Buy</button>
+    <p id="message"></p>
+  `;
+}
+
+  // Show transaction history
+  async function loadTransactionHistory() {
+    dashboardContent.innerHTML = '<h2>Transaction History</h2><p>Loading transaction history...</p>';
+    try {
+      const res = await fetch(`http://localhost:8080/api/transactions?customerId=${encodeURIComponent(currentCustomer.id)}`);
+      if (!res.ok) throw new Error('Failed to load transaction history');
+
+      const transactions = await res.json();
+
+      if (transactions.length === 0) {
+        dashboardContent.innerHTML = '<h2>Transaction History</h2><p>No transactions found.</p>';
+        return;
+      }
+
+      let html = `
+        <h2>Transaction History</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Name</th>
+              <th>Iban</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      transactions.forEach(tx => {
+        const date = new Date(tx.date).toLocaleString();
+        html += `
+          <tr>
+            <td>${formatDate(tx.transactionDate)}</td>
+            <td>${tx.amount}</td>
+            <td>${tx.type}</td>
+            <td>${currentCustomer.name}</td>
+            <td>${tx.iban}</td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      dashboardContent.innerHTML = html;
+
+    } catch (error) {
+      dashboardContent.innerHTML = `<h2>Transaction History</h2><p style="color:red;">${error.message}</p>`;
+    }
+  }
+
+  // Orders Transactions
+async function makeTransaction() {
+  const asset = document.getElementById('asset').value.trim();
+  const size = Number(document.getElementById('size').value);
+  const price = Number(document.getElementById('price').value);
+  const side = 'BUY';
+
+  const messageEl = document.getElementById('message');
+
+  if (!asset || size <= 0 || price <= 0) {
+    messageEl.textContent = 'Please fill in all fields with valid values.';
+    messageEl.style.color = 'red';
+    return;
+  }
+
+  const customerId = currentCustomer?.id;
+
+  if (!customerId) {
+    messageEl.textContent = 'Customer info missing. Please login again.';
+    messageEl.style.color = 'red';
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:8080/api/orders/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetName: asset, size, price, customerId, side })
+    });
+
+    const text = await res.text();
+
+    if (res.ok) {
+      messageEl.textContent = 'Transaction successful!';
+      messageEl.style.color = 'green';
+
+      showSection('order');
+    } else {
+      messageEl.textContent = 'Transaction failed!';
+      messageEl.style.color = 'red';
+    }
+  } catch (error) {
+    messageEl.textContent = error.message;
+    messageEl.style.color = 'red';
+  }
+}
+
+let selectedAssetName = '';
+let selectedMaxSize = 0;
+let selectedPrice = 0;
+
+function openSellModal(assetName, maxSize, price) {
+  selectedAssetName = assetName;
+  selectedMaxSize = maxSize;
+  selectedPrice = price;
+
+  document.getElementById('modalAssetInfo').textContent = `${assetName} (Available: ${maxSize})`;
+  document.getElementById('sellPrice').textContent = `$${price.toFixed(2)}`;
+  document.getElementById('sellQuantity').value = '';
+  document.getElementById('sellModal').style.display = 'block';
+}
+
+function closeSellModal() {
+  document.getElementById('sellModal').style.display = 'none';
+}
+
+async function confirmSell() {
+  const quantity = parseFloat(document.getElementById('sellQuantity').value);
+
+  if (isNaN(quantity) || quantity <= 0 || quantity > selectedMaxSize) {
+    alert('Invalid quantity.');
+    return;
+  }
+
+  const order = {
+    assetName: selectedAssetName,
+    price: selectedPrice,
+    size: quantity,
+    customerId: currentCustomer.id,
+    side: 'SELL'
+  };
+
+  try {
+    const res = await fetch('http://localhost:8080/api/orders/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+
+    const message = await res.text();
+
+    if (res.ok) {
+      alert('Sell order placed!');
+      closeSellModal();
+      loadAssets();
+    } else {
+      alert('Sell failed: ' + message);
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+
+function logout() {
+localStorage.removeItem('customerEmail');
+localStorage.removeItem('customerFullName');
+window.location.href = 'login.html';
+}
+
+showSection('assets');
+</script>
+</body>
+</html>
