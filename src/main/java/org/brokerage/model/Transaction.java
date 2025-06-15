@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class Transactions {
+@Table(name = "transactions")
+public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

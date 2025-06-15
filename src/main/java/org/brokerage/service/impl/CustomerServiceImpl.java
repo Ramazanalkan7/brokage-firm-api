@@ -1,7 +1,7 @@
 package org.brokerage.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.brokerage.model.Customers;
+import org.brokerage.model.Customer;
 import org.brokerage.repository.CustomerRepository;
 import org.brokerage.service.CustomerService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +17,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public Optional<Customers> findByEmail(String email) {
+    public Optional<Customer> findByEmail(String email) {
         return customerRepository.findByEmail(email);
     }
 
@@ -28,7 +28,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public boolean checkPassword(String email, String rawPassword) {
-        Optional<Customers> customerOpt = customerRepository.findByEmail(email);
+        Optional<Customer> customerOpt = customerRepository.findByEmail(email);
         if (customerOpt.isEmpty()) {
             return false;
         }
@@ -37,7 +37,7 @@ public class CustomerServiceImpl implements CustomerService {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
-    public void saveCustomer(Customers customer) {
+    public void saveCustomer(Customer customer) {
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         customerRepository.save(customer);
     }

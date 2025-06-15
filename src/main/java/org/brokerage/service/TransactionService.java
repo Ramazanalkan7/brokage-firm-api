@@ -1,13 +1,13 @@
 package org.brokerage.service;
 
 import org.brokerage.dto.TransactionsRequest;
-import org.brokerage.model.Transactions;
+import org.brokerage.model.Transaction;
 
 import java.util.List;
 
-public interface TransactionsService {
+public interface TransactionService {
     void deposit(TransactionsRequest request);
     void withdraw(TransactionsRequest request);
-    List<Transactions> listTransaction(Long customerId);
+    List<Transaction> listTransaction(Long customerId);
 
 }

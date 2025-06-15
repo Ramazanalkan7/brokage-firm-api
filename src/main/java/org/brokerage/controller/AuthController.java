@@ -21,10 +21,8 @@ public class AuthController {
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
         boolean valid = customerService.checkPassword(loginRequest.getEmail(), loginRequest.getPassword());
         if (valid) {
-            System.out.println("Login successful");
             return ResponseEntity.ok("Login successful");
         } else {
-            System.out.println("Invalid credentials");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }

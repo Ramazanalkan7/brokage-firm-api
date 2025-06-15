@@ -2,8 +2,8 @@ package org.brokerage.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.brokerage.dto.TransactionsRequest;
-import org.brokerage.model.Transactions;
-import org.brokerage.service.TransactionsService;
+import org.brokerage.model.Transaction;
+import org.brokerage.service.TransactionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,9 +11,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
-public class TransactionsController {
+public class TransactionController {
 
-    private final TransactionsService transactionService;
+    private final TransactionService transactionService;
 
     @PostMapping("/deposit")
     public void deposit(@RequestBody TransactionsRequest request) {
@@ -26,7 +26,7 @@ public class TransactionsController {
     }
 
     @GetMapping
-    public List<Transactions> getTransaction(@RequestParam Long customerId) {
+    public List<Transaction> getTransaction(@RequestParam Long customerId) {
         return transactionService.listTransaction(customerId);
     }
 }
